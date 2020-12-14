@@ -76,7 +76,18 @@ def write_to_csv(posts):
             wr.writerows(post['text'])
 
 
+def posts_ids(posts):
+    ids = []
+    for post in posts:
+        ids.append(post["id"])
+
+    return ids
+
+
 posts = take_posts(10)
+
 owner_id = posts[0]["owner_id"]
+
+posts_ids(posts)
 
 print(take_comments(owner_id, 168327))
