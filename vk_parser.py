@@ -4,33 +4,69 @@ import time
 import csv
 
 
-def take_10_posts():
-    all_posts = []
-    count = 10
+def take_posts(counts):
+    all_text = []
     offset = 0
+    VK_POSTS = 'https://api.vk.com/method/wall.get'
+    try:
+        while offset < counts:
+            response = requests.get(VK_POSTS,
+                                    params={
+                                        'access_token': settings.TOKEN,
+                                        'v': settings.API_VERSION,
+                                        'domain': 'cosy_warhammer',
+                                        'count': counts,
+                                        'offset': offset
+                                    })
+            response.raise_for_status()
+            data = response.json()['response']['items']
+            offset += counts
+            all_text.extend(data)
+            time.sleep(0.5)
 
-    while offset < 10:
-        response = requests.get('https://api.vk.com/method/wall.get',
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except Exception as err:
+        print(f'Other error occurred: {err}')
+
+    return all_text
+
+
+def take_comments(owner_id, post_id):
+    all_text = []
+    counts = 100  # max number of comments
+    offset = 0
+    VK_COMMENTS = "https://api.vk.com/method/wall.getComments"
+
+    try:
+        response = requests.get(VK_COMMENTS,
                                 params={
                                     'access_token': settings.TOKEN,
                                     'v': settings.API_VERSION,
                                     'domain': settings.DOMAIN,
-                                    'count': count,
-                                    'offset': offset
+                                    'count': counts,
+                                    'offset': offset,
+                                    'owner_id': owner_id,
+                                    'post_id': post_id
                                 })
 
         data = response.json()['response']['items']
-        offset += 10
-        all_posts.extend(data)
+        all_text.extend(data)
         time.sleep(0.5)
 
-    return all_posts
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except Exception as err:
+        print(f'Other error occurred: {err}')
+
+    return all_text
 
 
 def write_to_text(posts):
-    with open('wrongart.txt', 'a', encoding="utf-8") as file:
+    with open('waha.txt', 'a', encoding="utf-8") as file:
         for text in posts:
-            file.write(text['text'])
+            str_id = str(text["owner_id"])
+            file.write(f'owner_id = {str_id}\n{text["text"]}\n\n##########################################################\n\n')
 
 
 def write_to_csv(posts):
@@ -40,7 +76,7 @@ def write_to_csv(posts):
             wr.writerows(post['text'])
 
 
-posts = take_10_posts()
-write_to_text(posts)
-write_to_csv(posts)
+posts = take_posts(10)
+owner_id = posts[0]["owner_id"]
 
+print(take_comments(owner_id, 168327))

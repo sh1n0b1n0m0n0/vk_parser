@@ -5,3 +5,4 @@ __pycache__/
 Include/
 pyvenv.cfg
 settings.py
+wrongart.csv
