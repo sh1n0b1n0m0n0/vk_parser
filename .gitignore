@@ -3,6 +3,7 @@ Lib/
 Scripts/
 __pycache__/
 Include/
+Обученные модели CNN и Word2Vec/
 pyvenv.cfg
 settings.py
 wrongart.csv
