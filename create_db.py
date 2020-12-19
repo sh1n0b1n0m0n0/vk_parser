@@ -1,6 +1,3 @@
-from webapp.models import db
-from flask import Flask
-from
+from webapp import db, create_app
 
-app = Flask(__name__)
 db.create_all(app=create_app())
