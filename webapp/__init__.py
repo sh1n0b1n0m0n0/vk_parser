@@ -6,9 +6,8 @@ from webapp.models import db
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     models.db.init_app(app)
-    #migrate = Migrate(app, models.db)
+    migrate = Migrate(app, models.db)
 
     @app.route('/')
     def index():

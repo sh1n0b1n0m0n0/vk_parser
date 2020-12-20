@@ -1,0 +1,1 @@
+set FLASK_APP=webapp && set FLASK_ENV=development && C:\projects\vk_parser\scripts\flask.exe run

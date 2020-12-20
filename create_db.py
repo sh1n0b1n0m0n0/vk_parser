@@ -1,3 +1,3 @@
-from webapp import db, create_app
+from webapp import db, app
 
-db.create_all(app=create_app())
+db.create_all(app=app)
