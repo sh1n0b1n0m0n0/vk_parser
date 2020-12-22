@@ -7,4 +7,3 @@ Include/
 pyvenv.cfg
 settings.py
 wrongart.csv
-webapp.db
