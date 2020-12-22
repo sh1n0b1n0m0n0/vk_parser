@@ -1,40 +1,57 @@
 import requests
 import settings
 import time
+from datetime import datetime
 import csv
+from urllib.error import HTTPError
+from webapp.models import Post, Group, Comment, db
+import sqlite3
 
-
-def take_posts(counts):
-    all_text = []
+def take_posts():
+    all_posts = []
+    count = 100
     offset = 0
     VK_POSTS = 'https://api.vk.com/method/wall.get'
+
     try:
-        while offset < counts:
+        while offset < 100:
             response = requests.get(VK_POSTS,
                                     params={
                                         'access_token': settings.TOKEN,
                                         'v': settings.API_VERSION,
                                         'domain': 'cosy_warhammer',
-                                        'count': counts,
+                                        'count': count,
                                         'offset': offset
                                     })
             response.raise_for_status()
             data = response.json()['response']['items']
-            offset += counts
-            all_text.extend(data)
+            offset += count
+            all_posts.extend(data)
             time.sleep(0.5)
+
+            for post in all_posts:
+                group_id = post['from_id']
+                # print(group_id)
+                post_id = post['id']
+                # print(post_id)
+                date = datetime.fromtimestamp(post['date'])
+                # print(date)
+                text = post['text']
+                # print(text)
+                likes = post['likes']['count']
+                # print(likes)
+                bd_save_posts(group_id, post_id, date, text, likes)
+                take_comments(group_id, post_id)
 
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
     except Exception as err:
         print(f'Other error occurred: {err}')
 
-    return all_text
-
 
 def take_comments(owner_id, post_id):
-    all_text = []
-    counts = 100  # max number of comments
+    all_comments = []
+    counts = 1000  # max number of comments
     offset = 0
     VK_COMMENTS = "https://api.vk.com/method/wall.getComments"
 
@@ -51,15 +68,25 @@ def take_comments(owner_id, post_id):
                                 })
 
         data = response.json()['response']['items']
-        all_text.extend(data)
+        all_comments.extend(data)
         time.sleep(0.5)
+        for comment in all_comments:
+            post_id = comment['post_id']
+            #print(post_id)
+            owner_id = comment['id']
+            #print(owner_id)
+            date = datetime.fromtimestamp(comment['date'])
+            #print(date)
+            text = comment['text']
+            #print(text)
+            likes = comment['thread']['count']
+            #print(likes)
+            bd_save_comments(post_id, owner_id, date, text, likes, 0)
 
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
     except Exception as err:
         print(f'Other error occurred: {err}')
-
-    return all_text
 
 
 def write_to_text(posts):
@@ -84,10 +111,59 @@ def posts_ids(posts):
     return ids
 
 
-posts = take_posts(10)
+def bd_save_groups(group_id, domain, group_name):
+    group_group = Group(group_id=group_id,
+                        domain=domain,
+                        group_name=group_name)
 
-owner_id = posts[0]["owner_id"]
+    db.session.add(group_group)
+    db.session.commit()
 
-posts_ids(posts)
 
-print(take_comments(owner_id, 168327))
+def bd_save_posts(group_id, post_id, date, text, likes):
+    post_exists = Post.query.filter(Post.post_id == post_id).count()
+    group_exists = Post.query.filter(Post.group_id == group_id).count()
+
+    print("posts and groups exists= ",post_exists, group_exists)
+
+    post_post = Post(group_id=group_id,
+                     post_id=post_id,
+                     date=date,
+                     text=text,
+                     likes=likes)
+    if not (post_exists and group_exists):
+    #if not post_exists:
+        try:
+            db.session.add(post_post)
+            db.session.commit()
+        except sqlite3.IntegrityError as int_err:
+            print(f"ooops it is {int_err}")
+        finally:
+            db.session.close()
+
+
+def bd_save_comments(post_id, owner_id, date, comment_text, likes, sentiment):
+    post_exists = Comment.query.filter(Comment.post_id == post_id).count()
+    owner_exists = Comment.query.filter(Comment.owner_id == owner_id).count()
+
+    print('posts and owners exists=',post_exists, owner_exists)
+
+    comm_comm = Comment(post_id=post_id,
+                        owner_id=owner_id,
+                        date=date,
+                        comment_text=comment_text,
+                        likes=likes,
+                        sentiment=sentiment)
+
+    if not (post_exists and owner_exists):
+    #if not post_exists:
+        try:
+            db.session.add(comm_comm)
+            db.session.commit()
+        except sqlite3.IntegrityError as int_err:
+            print(f"ooops it is {int_err}")
+        #except:
+            #db.session.rollback()
+            #raise
+        finally:
+            db.session.close()

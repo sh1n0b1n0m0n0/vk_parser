@@ -10,8 +10,10 @@ def create_app():
     migrate = Migrate(app, models.db)
 
     @app.route('/')
+    @app.route('/index')
     def index():
-        title = "Комментарии"
+        title = "Анализ комментарий из групп VK."
+
         return render_template('index.html', page_title=title)
 
     return app
