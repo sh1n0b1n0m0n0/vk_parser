@@ -25,6 +25,8 @@ class Post(db.Model):
     text = db.Column(db.String, nullable=True)
     likes = db.Column(db.Integer, nullable=False)
 
+    def __repr__(self):
+        return '<Пост {} {}>'.format(self.post_id, self.text)
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -35,3 +37,6 @@ class Comment(db.Model):
     comment_text = db.Column(db.String, nullable=False)
     likes = db.Column(db.Integer, nullable=False)
     sentiment = db.Column(db.Boolean, nullable=True)
+
+    def __repr__(self):
+        return '<Комментарий {} {}>'.format(self.owner_id, self.comment_text)
