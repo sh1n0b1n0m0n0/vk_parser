@@ -13,6 +13,7 @@ def take_posts(group_name):
     count = 100
     offset = 0
     VK_POSTS = 'https://api.vk.com/method/wall.get'
+    DOMAIN = str(group_name)
 
     try:
         while offset < 100:
@@ -20,7 +21,7 @@ def take_posts(group_name):
                                     params={
                                         'access_token': settings.TOKEN,
                                         'v': settings.API_VERSION,
-                                        'domain': str(group_name),
+                                        'domain': DOMAIN,
                                         'count': count,
                                         'offset': offset
                                     })
@@ -37,7 +38,7 @@ def take_posts(group_name):
                               text=post['text'],
                               likes=post['likes']['count'])
 
-                take_comments(owner_id=post['from_id'], post_id=post['id'])
+                take_comments(group_name=DOMAIN, owner_id=post['from_id'], post_id=post['id'])
 
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -45,18 +46,19 @@ def take_posts(group_name):
         print(f'Other error occurred: {err}')
 
 
-def take_comments(owner_id, post_id):
+def take_comments(group_name, owner_id, post_id):
     all_comments = []
     counts = 1000  # max number of comments
     offset = 0
     VK_COMMENTS = "https://api.vk.com/method/wall.getComments"
+    DOMAIN = group_name
 
     try:
         response = requests.get(VK_COMMENTS,
                                 params={
                                     'access_token': settings.TOKEN,
                                     'v': settings.API_VERSION,
-                                    'domain': settings.DOMAIN,
+                                    'domain': DOMAIN,
                                     'count': counts,
                                     'offset': offset,
                                     'owner_id': owner_id,
@@ -92,14 +94,6 @@ def write_to_csv(posts):
         wr = csv.writer(file, dialect='excel')
         for post in posts:
             wr.writerows(post['text'])
-
-
-def posts_ids(posts):
-    ids = []
-    for post in posts:
-        ids.append(post["id"])
-
-    return ids
 
 
 def bd_save_groups(group_id, domain, group_name):

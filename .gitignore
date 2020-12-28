@@ -8,3 +8,4 @@ pyvenv.cfg
 settings.py
 wrongart.csv
 webapp.db
+run.bat
