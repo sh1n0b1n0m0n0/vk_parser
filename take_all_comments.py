@@ -15,6 +15,9 @@ def preprocess_text(text):
 app = create_app()
 with app.app_context():
     query = Comment.query.all()
+    preprop_comm = []
 
     for comment in query:
-        print(preprocess_text(comment.comment_text))
+        preprop_comm.append(preprocess_text(comment.comment_text))
+
+print(preprop_comm)
