@@ -4,6 +4,10 @@ Scripts/
 __pycache__/
 Include/
 Обученные модели CNN и Word2Vec/
+venv/
+models/
+training_data/
+.ipynb_checkpoints/
 pyvenv.cfg
 settings.py
 wrongart.csv
