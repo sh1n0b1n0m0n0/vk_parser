@@ -7,7 +7,6 @@ Include/
 Обученные модели CNN и Word2Vec/
 venv/
 models/
-training_data/
 pyvenv.cfg
 settings.py
 wrongart.csv
