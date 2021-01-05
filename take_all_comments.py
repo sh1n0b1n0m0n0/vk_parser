@@ -4,9 +4,13 @@ import re
 
 
 def preprocess_text(text):
-    text = text.lower().replace("ё", "е")
-    text = re.sub('((www\.[^\s]+)|(https?://[^\s]+))', 'URL', text)
-    text = re.sub('@[^\s]+', 'USER', text)
+    text = text.lower().replace('ё', 'е')
+    text = text.replace('d', '')
+    text = text.replace('rt', '')
+    text = re.sub('((www\.[^\s]+)|(https?://[^\s]+))', '', text)
+    text = re.sub('@[^\s]+', '', text)
+    text = re.sub(r'\b[a-zA-Zа-яА-Я1-9]\b', '', text)
+    text = re.sub(r'[0-9]', '', text)
     text = re.sub('[^a-zA-Zа-яА-Я1-9]+', ' ', text)
     text = re.sub(' +', ' ', text)
     return text.strip()

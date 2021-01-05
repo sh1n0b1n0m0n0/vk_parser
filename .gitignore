@@ -1,4 +1,5 @@
 ﻿*.idea/
+*.ipynb_checkpoints/
 Lib/
 Scripts/
 __pycache__/
@@ -7,7 +8,6 @@ Include/
 venv/
 models/
 training_data/
-.ipynb_checkpoints/
 pyvenv.cfg
 settings.py
 wrongart.csv
