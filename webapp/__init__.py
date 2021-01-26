@@ -18,5 +18,8 @@ def create_app():
         form = QueryForm()
         return render_template('index.html', page_title=title, form=form)
 
+    def query_processing():
+        pass
+
     return app
 
