@@ -1,9 +1,8 @@
 from flask_migrate import Migrate
 from webapp.models import db
-from webapp.forms import QueryForm
+from webapp.forms import CommentForm
 from flask import render_template
-from flask import Flask
-
+from flask import Flask, request
 
 def create_app():
     app = Flask(__name__)
@@ -15,11 +14,9 @@ def create_app():
     @app.route('/index', methods=('GET', 'POST'))
     def index():
         title = "Анализ комментарий из групп VK"
-        form = QueryForm()
-        return render_template('index.html', page_title=title, form=form)
-
-    def query_processing():
-        pass
+        form = CommentForm()
+        if form.validate_on_submit():
+            comment = form.comment.data.strip()
+        return render_template('index.html', page_title=title, form=form, comment=comment)
 
     return app
-
