@@ -52,11 +52,3 @@ def conveyor(text):
     RF_tfidf_result = RF_tfidf_clf.predict(X_test)
 
     return RF_tfidf_result
-
-
-data = str(input())
-
-try:
-    print(data, conveyor(data))
-except UserWarning:
-    print('Oops, something wrong :)')
