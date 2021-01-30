@@ -1,7 +1,17 @@
-*.idea/
+﻿*.idea/
+.ipynb_checkpoints/
 Lib/
 Scripts/
 __pycache__/
 Include/
+Обученные модели CNN и Word2Vec/
+venv/
+models/
+RF_bow_model.sav
+RF_tfidf_model.sav
+RF_w2v_model.sav
 pyvenv.cfg
 settings.py
+wrongart.csv
+webapp.db
+run.bat
