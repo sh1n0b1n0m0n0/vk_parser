@@ -8,6 +8,24 @@ from webapp.models import Post, Group, Comment, db
 import sqlite3
 
 
+def take_groups(group_name):
+    group = []
+    VK_GROUPS = 'https://api.vk.com/method/groups.getById'
+    response = requests.get(VK_GROUPS,
+                            params={
+                                'access_token': settings.TOKEN,
+                                'v': settings.API_VERSION,
+                                'group_id': group_name})
+    response.raise_for_status()
+    data = response.json()['response']
+    group.extend(data)
+    time.sleep(1)
+    for item in group:
+        bd_save_groups(id=item['id'],
+                       screen_name=item['screen_name'],
+                       name=item['name'])
+
+
 def take_posts(group_name):
     all_posts = []
     count = 100
@@ -38,7 +56,10 @@ def take_posts(group_name):
                               text=post['text'],
                               likes=post['likes']['count'])
 
-                take_comments(group_name=DOMAIN, owner_id=post['from_id'], post_id=post['id'])
+                take_comments(group_id=post['from_id'],
+                              group_name=DOMAIN,
+                              owner_id=post['from_id'],
+                              post_id=post['id'])
 
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -46,7 +67,7 @@ def take_posts(group_name):
         print(f'Other error occurred: {err}')
 
 
-def take_comments(group_name, owner_id, post_id):
+def take_comments(group_id, group_name, owner_id, post_id):
     all_comments = []
     counts = 1000  # max number of comments
     offset = 0
@@ -69,7 +90,8 @@ def take_comments(group_name, owner_id, post_id):
         all_comments.extend(data)
         time.sleep(0.5)
         for comment in all_comments:
-            bd_save_comments(post_id=comment['post_id'],
+            bd_save_comments(group_id=group_id,
+                             post_id=comment['post_id'],
                              owner_id=comment['id'],
                              date=datetime.fromtimestamp(comment['date']),
                              comment_text=comment['text'],
@@ -96,13 +118,15 @@ def write_to_csv(posts):
             wr.writerows(post['text'])
 
 
-def bd_save_groups(group_id, domain, group_name):
-    group_exists = Group.query.filter(Group.group_id == group_id).count()
-    url_exists = Group.query.filter(Group.domain == domain).count()
+def bd_save_groups(id, screen_name, name):
+    group_exists = Group.query.filter(Group.group_id == id).count()
+    url_exists = Group.query.filter(Group.domain == screen_name).count()
 
-    group_group = Group(group_id=group_id,
-                        domain=domain,
-                        group_name=group_name)
+    group_group = Group(url='https://vk.com/public' + str(id),
+                        group_id=-id,
+                        domain=screen_name,
+                        group_name=name)
+
     if not (url_exists and group_exists):
         try:
             db.session.add(group_group)
@@ -134,14 +158,15 @@ def bd_save_posts(group_id, post_id, date, text, likes):
             db.session.close()
 
 
-def bd_save_comments(post_id, owner_id, date, comment_text, likes, sentiment):
+def bd_save_comments(group_id, post_id, owner_id, date, comment_text, likes, sentiment):
 
     post_exists = Comment.query.filter(Comment.post_id == post_id).count()
     owner_exists = Comment.query.filter(Comment.owner_id == owner_id).count()
 
     print('posts and owners exists=',post_exists, owner_exists)
 
-    comm_comm = Comment(post_id=post_id,
+    comm_comm = Comment(group_id=group_id,
+                        post_id=post_id,
                         owner_id=owner_id,
                         date=date,
                         comment_text=comment_text,

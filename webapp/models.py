@@ -9,13 +9,11 @@ db = SQLAlchemy()
 class Group(db.Model):
     #__tablename__ = 'groups'
 
+    url = db.Column(db.String, unique=True, nullable=False)
     group_id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.String, unique=True, nullable=False)
     group_name = db.Column(db.String, nullable=False)
     posts = db.relationship('Post', backref='group')
-
-    def get_group(self, domain):
-        pass
 
     def __repr__(self):
         return '<Группа {} {}>'.format(self.group_name, self.domain)
@@ -37,7 +35,7 @@ class Post(db.Model):
 
 class Comment(db.Model):
     #__tablename__ = 'comments'
-
+    group_id = db.Column(db.Integer, primary_key=True)
     post_id = db.Column(db.Integer, db.ForeignKey('post.post_id'))
     owner_id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
