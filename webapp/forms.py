@@ -5,7 +5,7 @@ from wtforms.widgets import TextArea
 
 
 class CommentForm(FlaskForm):
-    comment = TextAreaField('Давай оценим твоё предложение',
+    comment = TextAreaField('Ну давай разберем по частям, тобою написанное!',
                             widget=TextArea(),
                             validators=[DataRequired()],
                             render_kw={'class': 'form-control'})
