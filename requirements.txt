@@ -23,7 +23,6 @@ more-itertools==8.6.0
 pluggy==0.13.1
 py==1.10.0
 pycparser==2.20
-pypiwin32==223
 PySocks==1.7.1
 pytest==3.7.1
 pytest-sugar==0.9.1
